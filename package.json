@@ -1,0 +1,43 @@
+{
+  "name": "cordova-leaflet-mbtiles",
+  "version": "0.0.1",
+  "description": "Cordova plugin to utilise MBTiles via Cordova-sqlite-storage",
+  "cordova": {
+    "id": "cordova-leaflet-mbtiles",
+    "platforms": [
+      "android",
+      "ios",
+      "windows"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/keyz182/cordova-leaflet-mbtiles.git"
+  },
+  "keywords": [
+    "mbtiles",
+    "leaflet",
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios",
+    "cordova-windows"
+  ],
+  "author": { 
+	"name" : "Kieran Evans",
+	"email" : "keyz182@gmail.com",
+	"url" : "https://kdevans.co.uk/"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/keyz182/cordova-leaflet-mbtiles/issues"
+  },
+  "homepage": "https://github.com/keyz182/cordova-leaflet-mbtiles",
+  "dependencies": {
+    "cordova-sqlite-storage": ">=2.0.0"
+  },
+  "engines": {
+    "cordovaDependencies": {
+        "0.0.1":  { "cordova-sqlite-storage": ">2.0.0" }
+    }
+  }
+}
