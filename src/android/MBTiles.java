@@ -14,14 +14,17 @@ public class MBTiles extends CordovaPlugin {
             //convert String to char array (1st step)
             char[] charArray = data.getString(0).toCharArray();
             
-            // decode the char array to byte[] (2nd step)
-            byte[] decodedHex = Hex.decodeHex(charArray);
+			try {
+				// decode the char array to byte[] (2nd step)
+				byte[] decodedHex = Hex.decodeHex(charArray);
 
-            // The String decoded to Base64 (3rd step)
-            String result= Base64.encodeBase64String(decodedHex);
-            
-            callbackContext.success(result);
-
+				// The String decoded to Base64 (3rd step)
+				String result= Base64.encodeBase64String(decodedHex);
+					
+				callbackContext.success(result);
+			}catch(DecoderException ex){
+				callbackContext.error(ex.message);
+			}
             return true;
 
         } else {
