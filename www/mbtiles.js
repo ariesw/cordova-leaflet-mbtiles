@@ -96,13 +96,7 @@ if(!window.hasOwnProperty('L')){
                                 reject(e);
                             }
                         }else{
-                            try {
-                                var link = that.getTileUrl(data);
-
-                                resolve({'image':link})
-                            }catch(e){
-                                reject(-1);
-                            }
+                            reject(-1);
                         }
                     }, function(error){
                         console.log(error);
@@ -139,7 +133,7 @@ if(!window.hasOwnProperty('L')){
                 },10);
             }else{
                 //TODO iterate over list of MBTiles DBs
-                var promises = [ that.getTileFromDb(data) ];
+                var promises = [ that.getTileFromDb(data)];
 
                 //Converts promise rejects and successes into uniform successes so promise.all works
                 function reflect(promise){
@@ -150,30 +144,32 @@ if(!window.hasOwnProperty('L')){
                 Promise.all(promises.map(reflect)).then(function(results){
                     //Filter for successful results
                     var success = results.filter(function(x){
-                       return x.status === "resolved"
+                       return x.status === "resolved";
                     });
 
-                    if(success.length <= 0){
-                        //There were no successful results, no tile!
-                        console.error("Couldn't load tile at all!");
-                    }else{
-                        //There was at least one successful result
-                        //TODO: do we have dataurls? if so, ignore image urls, if not use image urls
-                        //TODO: Work out priority system
-                        if('dataurl' in success[0].v){
-                            tile.innerHTML = '';
-                            that.addDebugHtml(tile, data);
+                    var dataurls = success.filter(function(x){
+                        return 'dataurl' in x.v;
+                    });
 
-                            tile.style.backgroundImage = "url('" + success[0].v.dataurl + "')";
-                        }else if('image' in success[0].v){
+                    if(dataurls.length <= 0){
+                        try{
                             var img = document.createElement('img');
-                            img.src = success[0].v.image;
+                            img.src = that.getTileUrl(data);
                             img.style = 'top:0;left:0;height:100%;width:100%;position:absolute;';
 
                             that.addDebugHtml(tile, data);
 
                             tile.appendChild(img);
+                        }catch(e){
+                            console.error("Couldn't get tile URL");
+                            console.error(e);
                         }
+                    }else{
+                        //There was at least one successful result
+                        //TODO: Work out how to prioritise
+                        tile.innerHTML = '';
+                        that.addDebugHtml(tile, data);
+                        tile.style.backgroundImage = "url('" + dataurls[0].v.dataurl + "')";
                     }
 
                     //Whatever the result, call done on the tile
