@@ -33,11 +33,11 @@
   },
   "homepage": "https://github.com/keyz182/cordova-leaflet-mbtiles",
   "dependencies": {
-    "cordova-sqlite-storage": ">=2.0.0"
+    "cordova-sqlite-ext": ">=0.10.5"
   },
   "engines": {
     "cordovaDependencies": {
-        "0.0.1":  { "cordova-sqlite-storage": ">2.0.0" }
+        "0.0.1":  { "cordova-sqlite-ext": ">=0.10.5" }
     }
   }
 }
