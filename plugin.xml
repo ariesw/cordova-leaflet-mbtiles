@@ -6,5 +6,12 @@
     </js-module>
     <platform name="android">
         <framework src="commons-codec:commons-codec:1.9" />
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="MBTiles">
+                <param name="android-package" value="uk.co.dbyz.cordova.leaflet-mbtiles.MBTiles"/>
+            </feature>
+        </config-file>
+
+        <source-file src="src/android/MBTiles.java" target-dir="src/uk/co/dbyz/cordova/leaflet-mbtiles/"/>
     </platform>
 </plugin>
