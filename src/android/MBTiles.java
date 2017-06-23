@@ -1,4 +1,4 @@
-package uk.co.dbyz.cordova.leaflet-mbtiles;
+package uk.co.dbyz.cordova.leaflet.mbtiles;
 
 import org.apache.cordova.*;
 import org.apache.commons.codec.binary.*;
