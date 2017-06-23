@@ -87,10 +87,13 @@ if (!window.hasOwnProperty('L')) {
                         if (result.rows.length > 0) {
                             try {
                                 var hex = result.rows.item(0).tile_data;
-                                var dataurl = '';
-                                dataurl = 'data:image/png;base64,' + hexToB64(hex);
 
-                                resolve({'dataurl': dataurl});
+                                cordova.exec(function success(data) {
+                                    resolve({'dataurl': 'data:image/png;base64,' + data});
+                                }, function error(error){
+                                    console.error(error);
+                                    reject(e);
+                                }, "MBTiles", "hextob64", [hex]);
                             } catch (e) {
                                 if(that.debug) console.log(e);
                                 reject(e);
