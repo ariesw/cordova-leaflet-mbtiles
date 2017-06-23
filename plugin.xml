@@ -4,4 +4,7 @@
     <js-module name="CordovaLeafletMBTiles" src="www/mbtiles.js">
         <clobbers target="cordova.plugins.CordovaLeafletMBTiles" />
     </js-module>
+    <platform name="android">
+        <framework src="commons-codec:commons-codec:1.9" />
+    </platform>
 </plugin>
