@@ -21,7 +21,7 @@ var fromCharCode = function(bytes){
     }
     strings.push(String.fromCharCode.apply(null, array));
     return strings.join('');
-}
+};
 
 var hexToB64 = function (inStr) {
     var hexArray = inStr
@@ -77,6 +77,39 @@ if(!window.hasOwnProperty('L')){
             }
             return tile;
         },
+        getTileFromDb: function(data){
+            var that = this;
+
+            return new Promise(function promise(resolve, reject){
+                that.db.executeSql('SELECT hex(tile_data) as tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
+                    [data.z, data.x, data['-y']],
+                    function success(result){
+                        if (result.rows.length > 0) {
+                            try{
+                                var hex = result.rows.item(0).tile_data;
+                                var dataurl = '';
+                                dataurl = 'data:image/png;base64,' + hexToB64(hex);
+
+                                resolve({'dataurl' : dataurl});
+                            }catch(e){
+                                console.log(e);
+                                reject(e);
+                            }
+                        }else{
+                            try {
+                                var link = that.getTileUrl(data);
+
+                                resolve({'image':link})
+                            }catch(e){
+                                reject(-1);
+                            }
+                        }
+                    }, function(error){
+                        console.log(error);
+                        reject(error);
+                    });
+            });
+        },
         createTile: function (coords, done) {
             var that = this;
             var tile = document.createElement('div');
@@ -88,6 +121,7 @@ if(!window.hasOwnProperty('L')){
                 y: coords.y,
                 z: this._getZoomForUrl()
             };
+
             if (this._map && !this._map.options.crs.infinite) {
                 var invertedY = this._globalTileRange.max.y - coords.y;
                 if (this.options.tms) {
@@ -104,43 +138,47 @@ if(!window.hasOwnProperty('L')){
                     done(null, tile);
                 },10);
             }else{
-                that.db.executeSql('SELECT hex(tile_data) as tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
-                    [data.z, data.x, data['-y']],
-                    function success(result){
-                        if (result.rows.length > 0) {
-                            try{
-                                var hex = result.rows.item(0).tile_data;
-                                var dataurl = '';
-                                dataurl = 'data:image/png;base64,' + hexToB64(hex);
+                //TODO iterate over list of MBTiles DBs
+                var promises = [ that.getTileFromDb(data) ];
 
-                                tile.innerHTML = '';
-                                that.addDebugHtml(tile, data);
+                //Converts promise rejects and successes into uniform successes so promise.all works
+                function reflect(promise){
+                    return promise.then(function(v){ return {v:v, status: "resolved" }},
+                        function(e){ return {e:e, status: "rejected" }});
+                }
 
-                                tile.style.backgroundImage = "url('" + dataurl + "')";
-                            }catch(e){
-                                console.log(e);
-                            }
+                Promise.all(promises.map(reflect)).then(function(results){
+                    //Filter for successful results
+                    var success = results.filter(function(x){
+                       return x.status === "resolved"
+                    });
 
-                        }else{
-                            try{
-                                var link = that.getTileUrl(data);
+                    if(success.length <= 0){
+                        //There were no successful results, no tile!
+                        console.error("Couldn't load tile at all!");
+                    }else{
+                        //There was at least one successful result
+                        //TODO: do we have dataurls? if so, ignore image urls, if not use image urls
+                        //TODO: Work out priority system
+                        if('dataurl' in success[0].v){
+                            tile.innerHTML = '';
+                            that.addDebugHtml(tile, data);
 
-                                var img = document.createElement('img');
-                                img.src = link;
-                                img.style = 'top:0;left:0;height:100%;width:100%;position:absolute;';
+                            tile.style.backgroundImage = "url('" + success[0].v.dataurl + "')";
+                        }else if('image' in success[0].v){
+                            var img = document.createElement('img');
+                            img.src = success[0].v.image;
+                            img.style = 'top:0;left:0;height:100%;width:100%;position:absolute;';
 
-                                that.addDebugHtml(tile, data);
+                            that.addDebugHtml(tile, data);
 
-                                tile.appendChild(img);
-                            }catch(e){
-                                console.err(e);
-                            }
+                            tile.appendChild(img);
                         }
+                    }
 
-                        done(null, tile);
-                    }, function(error){
-                        console.log(error);
-                    })
+                    //Whatever the result, call done on the tile
+                    done(null, tile);
+                });
             }
 
             return tile;
