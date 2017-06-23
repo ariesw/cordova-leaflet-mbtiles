@@ -24,7 +24,7 @@ public class MBTiles extends CordovaPlugin {
 					
 				callbackContext.success(result);
 			}catch(DecoderException ex){
-				callbackContext.error(ex.message);
+				callbackContext.error(ex.getMessage());
 			}
             return true;
 
